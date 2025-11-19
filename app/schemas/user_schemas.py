@@ -1,0 +1,26 @@
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List, Dict
+from datetime import datetime
+
+class UserCreate(BaseModel):
+    login: str
+    password: str
+    email: EmailStr
+    tag: Optional[str] = None
+    plan: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: int
+    login: str
+    email: str
+    tag: Optional[str]
+    plan: Optional[str]
+    plan_date: Optional[datetime]
+    selected_feelings: Optional[List[str]]
+    selected_path: Optional[str]
+    test_results: Optional[Dict]
+    progress: Optional[Dict]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
