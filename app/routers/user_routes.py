@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.user_schemas import UserCreate, UserResponse
+from app.schemas.user_schemas import UserCreate, UserResponse, CreateUserResponse
 from app.controllers.user_controller import (
     create_user_controller,
     get_user_controller,
@@ -11,10 +11,45 @@ from app.controllers.user_controller import (
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user_route(user: UserCreate, db: Session = Depends(get_db)):
-    """Cria um novo usuário"""
-    return create_user_controller(user, db)
+
+@router.post("/", response_model=CreateUserResponse, status_code=status.HTTP_201_CREATED)
+def create_user_route(
+    user: UserCreate, 
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Cria um novo usuário e retorna tokens de autenticação
+    
+    O usuário é criado e automaticamente recebe:
+    - Access token (válido por 30 dias)
+    - Refresh token (válido por 30 dias, renovável)
+    
+    Example:
+        POST /users/
+        {
+            "login": "novousuario",
+            "password": "Senha123@",
+            "email": "novo@email.com",
+            "tag": "client",
+            "plan": "trial"
+        }
+        
+        Response:
+        {
+            "access_token": "eyJhbGc...",
+            "refresh_token": "a8f3k2j9...",
+            "token_type": "bearer",
+            "user": {
+                "id": 4,
+                "login": "novousuario",
+                "email": "novo@email.com",
+                "tag": "client",
+                "plan": "trial"
+            }
+        }
+    """
+    return create_user_controller(user, db, request)
 
 
 @router.get("/{user_id}", response_model=UserResponse)

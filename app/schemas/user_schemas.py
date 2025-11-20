@@ -24,3 +24,13 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CreateUserResponse(BaseModel):
+    """Schema para resposta de criação de usuário (com tokens)"""
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    user: dict
+
+    class Config:
+        from_attributes = True
