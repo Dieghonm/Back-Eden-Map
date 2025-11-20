@@ -1,6 +1,4 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
 from app.schemas.user_schemas import UserCreate
 from app.services.user_service import (
     create_user_service,
@@ -10,12 +8,15 @@ from app.services.user_service import (
 
 
 def create_user_controller(user: UserCreate, db: Session):
+    """Controller para criar usuário"""
     return create_user_service(user, db)
 
 
 def get_user_controller(user_id: int, db: Session):
+    """Controller para buscar usuário"""
     return get_user_service(user_id, db)
 
 
 def list_users_controller(skip: int, limit: int, db: Session):
+    """Controller para listar usuários"""
     return list_users_service(skip, limit, db)
