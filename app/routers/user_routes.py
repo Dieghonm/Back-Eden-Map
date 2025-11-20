@@ -8,11 +8,17 @@ from app.controllers.user_controller import (
     get_user_controller,
     list_users_controller
 )
+from app.auth.dependencies import rate_limit_register
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/", response_model=CreateUserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", 
+    response_model=CreateUserResponse, 
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit_register)]
+)
 def create_user_route(
     user: UserCreate, 
     request: Request,
@@ -20,6 +26,8 @@ def create_user_route(
 ):
     """
     Cria um novo usuário e retorna tokens de autenticação
+    
+    **Rate Limit: 2 requisições por hora por IP**
     
     O usuário é criado e automaticamente recebe:
     - Access token (válido por 30 dias)
@@ -48,6 +56,9 @@ def create_user_route(
                 "plan": "trial"
             }
         }
+    
+    Errors:
+        429: Too many registration attempts (excedeu 2 requisições/hora)
     """
     return create_user_controller(user, db, request)
 

@@ -4,11 +4,17 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.auth_schemas import LoginRequest, LoginResponse, RefreshTokenRequest, TokenResponse
 from app.controllers.auth_controller import login_controller, refresh_token_controller
+from app.auth.dependencies import rate_limit_login, rate_limit_refresh
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/login", 
+    response_model=LoginResponse, 
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit_login)]
+)
 def login_route(
     credentials: LoginRequest, 
     request: Request,
@@ -16,6 +22,8 @@ def login_route(
 ):
     """
     Rota de autenticação com usuário e senha
+    
+    **Rate Limit: 6 requisições por hora por IP**
     
     Recebe login e senha, retorna access token, refresh token e dados do usuário
     
@@ -47,11 +55,20 @@ def login_route(
                 "plan": "admin"
             }
         }
+    
+    Errors:
+        401: Invalid credentials
+        429: Too many login attempts (excedeu 6 requisições/hora)
     """
     return login_controller(credentials, db, request)
 
 
-@router.post("/refresh", response_model=TokenResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/refresh", 
+    response_model=TokenResponse, 
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit_refresh)]
+)
 def refresh_token_route(
     refresh_request: RefreshTokenRequest,
     request: Request,
@@ -59,6 +76,8 @@ def refresh_token_route(
 ):
     """
     Rota para renovar access token usando refresh token
+    
+    **Rate Limit: 4 requisições por hora por IP**
     
     Recebe um refresh token válido e retorna novos tokens
     O refresh token é automaticamente renovado por mais 30 dias
@@ -90,5 +109,9 @@ def refresh_token_route(
                 "plan": "admin"
             }
         }
+    
+    Errors:
+        401: Invalid or expired refresh token
+        429: Too many refresh attempts (excedeu 4 requisições/hora)
     """
     return refresh_token_controller(refresh_request, db, request)
