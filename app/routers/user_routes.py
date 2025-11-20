@@ -11,7 +11,6 @@ from app.controllers.user_controller import (
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user_route(user: UserCreate, db: Session = Depends(get_db)):
     """Cria um novo usuário"""

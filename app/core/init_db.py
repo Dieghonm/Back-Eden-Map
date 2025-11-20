@@ -20,7 +20,7 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_user(db: Session, login: str, email: str, tag: str, password: str):
+def create_user(db: Session, login: str, email: str, tag: str,plan: str,password: str):
     """Cria um usuário no banco."""
     hashed_password = hash_password(password)
 
@@ -28,6 +28,7 @@ def create_user(db: Session, login: str, email: str, tag: str, password: str):
         login=login,
         email=email,
         tag=tag,
+        plan=plan,
         password=hashed_password
     )
 
@@ -49,9 +50,9 @@ def create_initial_users(db: Session):
             login=u["login"],
             email=u["email"],
             tag=u["tag"],
+            plan=u["tag"],
             password=u["password"],
         )
-
 
 def is_db_empty(db: Session) -> bool:
     """Retorna True se não houver usuários no banco."""

@@ -21,31 +21,31 @@ class User(Base):
     # -----------------------------------------
     # Assinatura / Plano
     # -----------------------------------------
-    tag = Column(String, nullable=True)
-    plan = Column(String, nullable=True)
-    plan_date = Column(DateTime, nullable=True)
+    tag = Column(String, nullable=False, default="client")
+    plan = Column(String, nullable=False, default="trial")
+    plan_date = Column(DateTime, nullable=False, default=func.now())
 
     # -----------------------------------------
     # Senha temporária
     # -----------------------------------------
-    temp_password = Column(String, nullable=True)
-    temp_password_expires = Column(DateTime, nullable=True)
+    temp_password = Column(String, nullable=True, default=None)
+    temp_password_expires = Column(DateTime, nullable=True, default=None)
 
     # -----------------------------------------
     # Dados do usuário (emocionais / caminhos)
     # -----------------------------------------
-    selected_feelings = Column(JSON, nullable=True)
-    selected_path = Column(String, nullable=True)
-    test_results = Column(JSON, nullable=True)
+    selected_feelings = Column(JSON, nullable=True, default=None)
+    selected_path = Column(String, nullable=True, default=None)
+    test_results = Column(JSON, nullable=True, default=None)
 
     # -----------------------------------------
     # Progresso
     # -----------------------------------------
-    progress = Column(JSON, nullable=True)
-    progress_updated_at = Column(DateTime, nullable=True)
+    progress = Column(JSON, nullable=True, default=None)
+    progress_updated_at = Column(DateTime, nullable=True, default=None)
 
     # -----------------------------------------
     # Datas de sistema
     # -----------------------------------------
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=True, onupdate=func.now())
