@@ -8,6 +8,7 @@ from app.services.user_service import (
 
 
 def create_user_controller(user: UserCreate, db: Session):
+    print(user)
     response = create_user_service(user, db)
     return response
 

@@ -17,7 +17,6 @@ def create_user_service(user: UserCreate, db: Session):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Login already registered"
         )
-
     # Verificar se email já existe
     email_exists = db.query(User).filter(User.email == user.email).first()
     if email_exists:
@@ -25,10 +24,8 @@ def create_user_service(user: UserCreate, db: Session):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-
     # Hash da senha
     hashed_password = pwd_context.hash(user.password)
-
     # Criar usuário
     new_user = User(
         login=user.login,
@@ -37,7 +34,7 @@ def create_user_service(user: UserCreate, db: Session):
         tag=user.tag,
         plan=user.plan
     )
-
+    print(new_user)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
