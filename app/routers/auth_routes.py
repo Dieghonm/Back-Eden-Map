@@ -1,37 +1,45 @@
-# app/routers/auth_routes.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from jose import jwt
 
 from app.core.database import get_db
-from app.core.config import settings
-
+from app.schemas.auth_schemas import LoginRequest, LoginResponse
+from app.controllers.auth_controller import login_controller
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/login", response_model=LoginResponse)
-def login(login: str, password: str, db: Session = Depends(get_db)):
+
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+def login_route(credentials: LoginRequest, db: Session = Depends(get_db)):
     """
-    Rota de login
+    Rota de autenticação
+    
+    Recebe login e senha, retorna token JWT e dados do usuário
     
     Args:
-        login: Login do usuário
-        password: Senha do usuário
+        credentials: Objeto com login e password
+        db: Sessão do banco de dados (injetada automaticamente)
     
     Returns:
-        Token JWT e dados do usuário
-    """
-    # Buscar usuário pelo login
-    # user = db.query(User).filter(User.login == login).first()
-    print('user')
+        LoginResponse com token JWT e dados do usuário
     
-    return {
-        "access_token": 'access_token',
-        "user": {
-            "id": 'user.id',
-            "login": 'user.login',
-            "email": 'user.email',
-            "tag": 'user.tag',
-            "plan": 'user.plan'
+    Example:
+        POST /auth/login
+        {
+            "login": "dieghonm",
+            "password": "Admin123@"
         }
-    }
+        
+        Response:
+        {
+            "access_token": "eyJhbGc...",
+            "token_type": "bearer",
+            "user": {
+                "id": 1,
+                "login": "dieghonm",
+                "email": "dieghonm@gmail.com",
+                "tag": "admin",
+                "plan": "admin"
+            }
+        }
+    """
+    return login_controller(credentials, db)
