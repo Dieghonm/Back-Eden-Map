@@ -1,5 +1,6 @@
 # app/core/config.py
 from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Settings(BaseSettings):
     # Banco de dados
@@ -15,6 +16,12 @@ class Settings(BaseSettings):
     RATE_LIMIT_REFRESH: int = 4
     RATE_LIMIT_LOGIN: int = 6
     RATE_LIMIT_PASSWORD_RECOVERY: int = 6
+    
+    # Brevo Email Service
+    BREVO_API_KEY: Optional[str] = None
+    BREVO_SENDER_EMAIL: str = "duo.estudio.tech@gmail.com"
+    BREVO_SENDER_NAME: str = "Eden Map"
+    EMAIL_ENABLED: bool = True
 
     class Config:
         env_file = ".env"
