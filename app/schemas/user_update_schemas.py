@@ -6,11 +6,14 @@ from datetime import datetime
 class UpdateSelectedPathSchema(BaseModel):
     """Schema para atualizar o caminho selecionado"""
     email: EmailStr
-    selected_path: str
+    selected_path: Optional[str] = None
     
     @field_validator('selected_path')
     @classmethod
     def validate_path(cls, v):
+        if v is None:
+            return v
+            
         valid_paths = ['Ansiedade', 'Atenção Plena', 'Autoimagem', 'Motivação', 'Relacionamentos']
         if v not in valid_paths:
             raise ValueError(f'selected_path deve ser um dos seguintes: {", ".join(valid_paths)}')

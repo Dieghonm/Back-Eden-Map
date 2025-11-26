@@ -18,6 +18,7 @@ logger = logging.getLogger('app.services.user_update_service')
 def update_selected_path_service(data: UpdateSelectedPathSchema, db: Session):
     """
     Atualiza o caminho selecionado pelo usuário usando email
+    Aceita None para resetar o caminho
     
     Args:
         data: Schema com email e selected_path
@@ -38,16 +39,18 @@ def update_selected_path_service(data: UpdateSelectedPathSchema, db: Session):
             detail="User not found with this email"
         )
     
-    # Atualizar selected_path
     user.selected_path = data.selected_path
     
     db.commit()
     db.refresh(user)
     
-    logger.info(f"✅ Caminho atualizado para usuário {user.login} ({data.email}): {data.selected_path}")
+    if data.selected_path is None:
+        logger.info(f"✅ Caminho resetado para usuário {user.login} ({data.email})")
+    else:
+        logger.info(f"✅ Caminho atualizado para usuário {user.login} ({data.email}): {data.selected_path}")
     
     return {
-        "message": "Selected path updated successfully",
+        "message": "Selected path updated successfully" if data.selected_path else "Selected path reset successfully",
         "updated_field": "selected_path",
         "user_id": user.id,
         "email": user.email,
