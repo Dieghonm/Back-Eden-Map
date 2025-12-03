@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from passlib.context import CryptContext
 import secrets
 
@@ -127,14 +128,25 @@ def validate_refresh_token(token: str, db: Session):
     return refresh_token.user
 
 
-def authenticate_user(login: str, password: str, db: Session):
+def authenticate_user(login_or_email: str, password: str, db: Session):
     """
-    Autentica o usuário verificando login e senha
+    Autentica o usuário verificando login OU email e senha
+    
+    Args:
+        login_or_email: Login ou email do usuário
+        password: Senha do usuário
+        db: Sessão do banco de dados
     
     Returns:
         User object se autenticado, None caso contrário
     """
-    user = db.query(User).filter(User.login == login).first()
+    # Buscar usuário por login OU email
+    user = db.query(User).filter(
+        or_(
+            User.login == login_or_email,
+            User.email == login_or_email
+        )
+    ).first()
     
     if not user:
         return None
@@ -163,7 +175,6 @@ def serialize_user_data(user: User) -> dict:
         "tag": user.tag,
         "plan": user.plan,
         "plan_date": user.plan_date.isoformat() if user.plan_date else None,
-        "selected_path": user.selected_path if user.selected_path else None,
         "selected_path": user.selected_path,
         "progress": user.progress if user.progress else None,
     }
@@ -204,6 +215,14 @@ def generate_tokens_for_user(user: User, db: Session, ip_address: str = None, us
 def login_service(login: str, password: str, db: Session, ip_address: str = None, user_agent: str = None):
     """
     Serviço de login que retorna tokens e dados do usuário
+    Aceita login OU email como identificador
+    
+    Args:
+        login: Login ou email do usuário
+        password: Senha do usuário
+        db: Sessão do banco de dados
+        ip_address: IP do cliente (opcional)
+        user_agent: User agent do cliente (opcional)
     
     Returns:
         dict com access_token, refresh_token e informações do usuário
